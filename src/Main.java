@@ -1,15 +1,68 @@
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-public class Main {
-    public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
+/*
+Главный файл проекта.
+Предоставляет меню для запуска заданий по практическим работам.
+*/
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
-        }
+import java.util.Scanner;
+
+public class Main {
+
+  private static final Scanner scanner = new Scanner(System.in);
+
+  private static final String[] TASKS = {
+      "Сортировка матрицы по сумме модулей элементов строк",
+  };
+
+  public static void main(String[] args) {
+    System.out.println("===== Практические задания по основам Java =====");
+
+    boolean isRunning = true;
+    while (isRunning) {
+      printMenu();
+
+      String input = scanner.nextLine().trim();
+
+      if (input.equalsIgnoreCase("q")) {
+        isRunning = false;
+        System.out.println("Выход из программы");
+        continue;
+      }
+
+      if (!input.matches("\\d+")) {
+        System.out.println("Ошибка: введите номер задания или 'q' для выхода");
+        continue;
+      }
+
+      int choice = Integer.parseInt(input);
+
+      if (choice < 1 || choice > TASKS.length) {
+        System.out.printf("Ошибка: введите номер от 1 до %d\n", TASKS.length);
+        continue;
+      }
+
+      runTask(choice);
     }
+  }
+
+  private static void printMenu() {
+    System.out.println("Выберите задание: ");
+    for (int i = 0; i < TASKS.length; i++) {
+      System.out.printf("%d. %s\n", i + 1, TASKS[i]);
+    }
+    System.out.println("q. Выйти");
+    System.out.print("Ваш выбор: ");
+  }
+
+  private static void runTask(int taskNumber) {
+    switch (taskNumber) {
+      case 1:
+        System.out.println("--- " + TASKS[0] + " ---");
+        pr1.Main.main(null);
+        break;
+      default:
+        System.out.println("Задание не найдено");
+        break;
+    }
+    System.out.println("--- Задание завершено, возврат в меню ---");
+  }
 }
