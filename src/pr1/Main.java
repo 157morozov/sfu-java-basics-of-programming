@@ -97,7 +97,14 @@ public class Main {
       return getIntPositiveInput(message); // Вызываем рекурсию в случае ошибки
     }
 
-    return Integer.parseInt(input);
+    int parsedValue = Integer.parseInt(input);
+
+    if (!(parsedValue > 0)) {
+      System.out.println("Ошибка: введите положительное целое число!");
+      return getIntPositiveInput(message); // Вызываем рекурсию в случае ошибки
+    };
+
+    return parsedValue;
   }
 
   /**
