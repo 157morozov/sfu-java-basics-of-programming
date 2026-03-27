@@ -18,21 +18,88 @@ public class Main {
   private static final Scanner scanner = new Scanner(System.in);
   private static final Random random = new Random();
 
+  // Объявление пунктов меню
+  private static final String[] MENU_ITEMS = {
+      "Ввести матрицу вручную",
+      "Сгенерировать случайную матрицу",
+      "Выполнить алгоритм",
+      "Вывести результат",
+  };
+
   // Реализация главного метода класса
   public static void main(String[] args) {
-    // Цикл для повторения программы по команде пользователя
-    // NOTE: Большая буква - выбор по умолчанию, т.е. для (Y, n) Y - выбор по умолчанию
-    do {
-      System.out.print("Сгенерировать матрицу? (Y, n): ");
+    int[][] matrix = null; // Объявление матрицы
+    int[][] result = null; // Объявление результирующей марицы
 
-      int[][] matrix = // Создание и заполнение исходной матрицы
-          scanner.nextLine().equalsIgnoreCase("n") // Пользовательский выбор
-              ? getUserMatrix() // При нежелании сгенерировать
-              : getRandomMatrix(); // Если захотел сгенерировать
+    boolean isRunning = true; // Замыкание
+    while (isRunning) {
+      printMenu(); // Выводим меню
 
-      System.out.println("Итоговая матрица: ");
-      printMatrix(getManipulatedMatrix(matrix)); // Вывод итоговой матрицы
-    } while (isRepeatNeeded());
+      String input = scanner.nextLine().trim(); // Берем действие пользователя
+
+      // Обрабатываем выход их программы
+      if (input.equalsIgnoreCase("q")) {
+        isRunning = false;
+        continue;
+      }
+
+      // Обрабатываем неправильный ввод пользователя по int значению
+      // NOTE: Реализовал так, потому что в задании нельзя использовать try-catch
+      if (!input.matches("\\d+")) {
+        System.out.println("Ошибка: введите номер пункта или 'q' для выхода");
+        continue;
+      }
+
+      // Обрабатываем неправильный ввод пользователя вне пунктов меню
+      int choice = Integer.parseInt(input);
+
+      if (choice < 1 || choice > MENU_ITEMS.length) {
+        System.out.printf("Ошибка: введите номер от 1 до %d\n", MENU_ITEMS.length);
+        continue;
+      }
+
+      // Определяем нужное поведение программы по выбранному пункту меню
+      switch (choice) {
+        case 1: // Ввод исходных данных, как вручную
+          matrix = getUserMatrix();
+          result = null;
+          break;
+        case 2: // Так и сгенерированных случайным образом
+          matrix = getRandomMatrix();
+          result = null;
+          break;
+        case 3: // Выполнение алгоритма по заданию
+          if (matrix == null) {
+            System.out.println("Ошибка: сначала введите или сгенерируйте матрицу (пункты 1 или 2)");
+          } else {
+            result = getManipulatedMatrix(matrix);
+            System.out.println("Алгоритм выполнен");
+          }
+          break;
+        case 4: // Вывод результата
+          if (result == null) {
+            System.out.println("Ошибка: сначала выполните алгоритм (пункт 3)");
+          } else {
+            System.out.println("Результирующая матрица:");
+            printMatrix(result);
+          }
+          break;
+      }
+    }
+  }
+
+  /**
+   * Выводим меню программы
+   */
+  private static void printMenu() {
+    System.out.println("Выберите действие: ");
+
+    for (int i = 0; i < MENU_ITEMS.length; i++) {
+      System.out.printf("%d. %s\n", i + 1, MENU_ITEMS[i]);
+    }
+
+    System.out.println("q. Вернуться в главное меню");
+    System.out.print("Ваш выбор: ");
   }
 
   /**
@@ -102,7 +169,8 @@ public class Main {
     if (!(parsedValue > 0)) {
       System.out.println("Ошибка: введите положительное целое число!");
       return getIntPositiveInput(message); // Вызываем рекурсию в случае ошибки
-    };
+    }
+    ;
 
     return parsedValue;
   }
@@ -210,17 +278,5 @@ public class Main {
       }
       System.out.println();
     }
-  }
-
-  /**
-   * Запрашиваем у пользователя нужно ли повторить скрипт заново
-   *
-   * @return нужен ли перезапуск
-   */
-  private static boolean isRepeatNeeded() {
-    System.out.print("Начать заново? (y, N): ");
-    String input = scanner.nextLine();
-
-    return input.equalsIgnoreCase("y");
   }
 }
