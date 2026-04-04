@@ -20,10 +20,11 @@ public class Main {
 
   // Объявление пунктов меню
   private static final String[] MENU_ITEMS = {
-      "Ввести матрицу вручную",
-      "Сгенерировать случайную матрицу",
-      "Выполнить алгоритм",
-      "Вывести результат",
+      "Ввод исходных данных вручную",
+      "Ввод исходных данных сгенерированных случайным образом",
+      "Выполнение алгоритма по заданию",
+      "Вывод результата",
+      "Завершение работы программы",
   };
 
   // Реализация главного метода класса
@@ -37,16 +38,10 @@ public class Main {
 
       String input = scanner.nextLine().trim(); // Берем действие пользователя
 
-      // Обрабатываем выход их программы
-      if (input.equalsIgnoreCase("q")) {
-        isRunning = false;
-        continue;
-      }
-
       // Обрабатываем неправильный ввод пользователя по int значению
       // NOTE: Реализовал так, потому что в задании нельзя использовать try-catch
       if (!input.matches("\\d+")) {
-        System.out.println("Ошибка: введите номер пункта или 'q' для выхода");
+        System.out.println("Ошибка: введите номер пункта");
         continue;
       }
 
@@ -84,6 +79,9 @@ public class Main {
             printMatrix(result);
           }
           break;
+        case 5: // Завершение программы
+          isRunning = false;
+          break;
       }
     }
   }
@@ -98,7 +96,6 @@ public class Main {
       System.out.printf("%d. %s\n", i + 1, MENU_ITEMS[i]);
     }
 
-    System.out.println("q. Вернуться в главное меню");
     System.out.print("Ваш выбор: ");
   }
 
