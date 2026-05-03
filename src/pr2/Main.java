@@ -5,372 +5,26 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
 
-
 /**
- * Учебная группа, к которой принадлежит студент.
- */
-class StudyGroup {
-
-  private String name;
-  private int course;
-
-  /**
-   * Создаёт учебную группу с указанным названием и номером курса.
-   */
-  public StudyGroup(String name, int course) {
-    this.name = name;
-    this.course = course;
-  }
-
-  @Override
-  public String toString() {
-    return getName() + " (" + course + " курс)";
-  }
-
-  /**
-   * Возвращает название группы.
-   */
-  public String getName() {
-    return name != null ? name : "";
-  }
-
-  /**
-   * Возвращает номер курса.
-   */
-  public int getCourse() {
-    return course;
-  }
-}
-
-/**
- * Пол студента.
- */
-enum Gender {
-  MALE("Мужской"),
-  FEMALE("Женский");
-
-  private final String label;
-
-  Gender(String label) {
-    this.label = label;
-  }
-
-  /**
-   * Возвращает читаемое обозначение пола.
-   */
-  public String getLabel() {
-    return label;
-  }
-}
-
-/**
- * Студент университета с личными и академическими атрибутами.
- */
-class Student {
-
-  // Текстовые поля
-  private String name; // Имя
-  private String surname; // Фамилия
-  private String patronymic; // Отчество
-
-  // Числовые поля
-  private int age; // Возраст (целое)
-  private double gpa; // Средний балл (вещественное)
-  private int groupNumber; // Номер группы (целое)
-  private double scholarship; // Стипендия в рублях (вещественное)
-
-  // Составные поля
-  private StudyGroup group; // Учебная группа
-  private Gender gender; // Пол
-
-
-  /**
-   * Создаёт студента со значениями по умолчанию.
-   */
-  public Student() {
-    this.name = "Имя";
-    this.surname = "Фамилия";
-    this.patronymic = "Отчество";
-    this.age = 18;
-    this.gpa = 3.0;
-    this.groupNumber = 1;
-    this.scholarship = 0.0;
-    this.group = new StudyGroup("Группа по умолчанию", 1);
-    this.gender = Gender.MALE;
-  }
-
-  /**
-   * Создаёт студента с явно указанными значениями всех полей.
-   */
-  public Student(
-      String name,
-      String surname,
-      String patronymic,
-      int age,
-      double gpa,
-      int groupNumber,
-      double scholarship,
-      StudyGroup group,
-      Gender gender) {
-    this.name = name;
-    this.surname = surname;
-    this.patronymic = patronymic;
-    this.age = age;
-    this.gpa = gpa;
-    this.groupNumber = groupNumber;
-    this.scholarship = scholarship;
-    this.group = group;
-    this.gender = gender;
-  }
-
-  /**
-   * Возвращает полное имя студента.
-   */
-  public String getFullName() {
-    return getSurname() + " " + getName() + " " + getPatronymic();
-  }
-
-  /**
-   * Возвращает имя.
-   */
-  public String getName() {
-    return name != null ? name : "";
-  }
-
-  /**
-   * Возвращает фамилию.
-   */
-  public String getSurname() {
-    return surname != null ? surname : "";
-  }
-
-  /**
-   * Возвращает отчество.
-   */
-  public String getPatronymic() {
-    return patronymic != null ? patronymic : "";
-  }
-
-  /**
-   * Возвращает возраст студента.
-   */
-  public int getAge() {
-    return age;
-  }
-
-  /**
-   * Возвращает средний балл.
-   */
-  public double getGpa() {
-    return gpa;
-  }
-
-  /**
-   * Возвращает номер учебной группы.
-   */
-  public int getGroupNumber() {
-    return groupNumber;
-  }
-
-  /**
-   * Возвращает размер ежемесячной стипендии.
-   */
-  public double getScholarship() {
-    return scholarship;
-  }
-
-  /**
-   * Возвращает строковое представление учебной группы.
-   */
-  public String getStudyGroup() {
-    return group.toString();
-  }
-
-  /**
-   * Возвращает обозначение пола.
-   */
-  public String getGender() {
-    return gender.getLabel();
-  }
-
-  /**
-   * Возвращает академический статус студента на основе среднего балла.
-   */
-  public String getAcademicStatus() {
-    if (gpa >= 4.5) {
-      return "Отличник";
-    } else if (gpa >= 3.5) {
-      return "Хорошист";
-    } else if (gpa >= 2.5) {
-      return "Троечник";
-    } else {
-      return "Должник";
-    }
-  }
-
-  /**
-   * Устанавливает имя, если оно является непустой строкой длиной от 2 до 50 символов.
-   *
-   * @return {@code true}, если значение принято; {@code false} в противном случае.
-   */
-  public boolean setName(String name) {
-    if (!isStringValid(name)) {
-      return false;
-    }
-    this.name = name;
-    return true;
-  }
-
-  /**
-   * Устанавливает фамилию, если она прошла валидацию.
-   *
-   * @return {@code true}, если значение принято.
-   */
-  public boolean setSurname(String surname) {
-    if (!isStringValid(surname)) {
-      return false;
-    }
-    this.surname = surname;
-    return true;
-  }
-
-  /**
-   * Устанавливает отчество, если оно прошло валидацию.
-   *
-   * @return {@code true}, если значение принято.
-   */
-  public boolean setPatronymic(String patronymic) {
-    if (!isStringValid(patronymic)) {
-      return false;
-    }
-    this.patronymic = patronymic;
-    return true;
-  }
-
-  /**
-   * Устанавливает возраст, если он находится в диапазоне [16, 100].
-   *
-   * @return {@code true}, если значение принято.
-   */
-  public boolean setAge(int age) {
-    if (age < 16 || age > 100) {
-      System.out.println("Ошибка: возраст должен быть в диапазоне от 16 до 100");
-      return false;
-    }
-    this.age = age;
-    return true;
-  }
-
-  /**
-   * Устанавливает средний балл, если он находится в диапазоне [0.0, 5.0].
-   *
-   * @return {@code true}, если значение принято.
-   */
-  public boolean setGpa(double gpa) {
-    if (gpa < 0.0 || gpa > 5.0) {
-      System.out.println("Ошибка: средний балл должен быть в диапазоне от 0.0 до 5.0");
-      return false;
-    }
-    this.gpa = gpa;
-    return true;
-  }
-
-  /**
-   * Устанавливает номер группы, если он является положительным числом.
-   *
-   * @return {@code true}, если значение принято.
-   */
-  public boolean setGroupNumber(int groupNumber) {
-    if (groupNumber <= 0) {
-      System.out.println("Ошибка: номер группы должен быть положительным числом");
-      return false;
-    }
-    this.groupNumber = groupNumber;
-    return true;
-  }
-
-  /**
-   * Устанавливает стипендию, если она не является отрицательным числом.
-   *
-   * @return {@code true}, если значение принято.
-   */
-  public boolean setScholarship(double scholarship) {
-    if (scholarship < 0.0) {
-      System.out.println("Ошибка: стипендия не может быть отрицательной");
-      return false;
-    }
-    this.scholarship = scholarship;
-    return true;
-  }
-
-  /**
-   * Устанавливает учебную группу.
-   */
-  public void setGroup(StudyGroup group) {
-    if (group == null) {
-      System.out.println("Ошибка: группа не может быть null");
-      return;
-    }
-    this.group = group;
-  }
-
-  /**
-   * Устанавливает пол студента.
-   */
-  public void setGender(Gender gender) {
-    if (gender == null) {
-      System.out.println("Ошибка: пол не может быть null");
-      return;
-    }
-    this.gender = gender;
-  }
-
-  private boolean isStringValid(String value) {
-    if (value == null || value.isBlank()) {
-      System.out.println("Ошибка: поле не может быть пустым");
-      return false;
-    }
-    if (value.length() < 2 || value.length() > 50) {
-      System.out.println("Ошибка: поле должно содержать от 2 до 50 символов");
-      return false;
-    }
-    return true;
-  }
-
-  @Override
-  public String toString() {
-    return String.format(
-        "%s (Возраст: %d, Пол: %s, Группа: %s, Номер гр.: %d, Средний балл: %.2f, Стипендия: "
-            + "%.2f руб., Статус: %s)",
-        getFullName(),
-        age,
-        getGender(),
-        getStudyGroup(),
-        groupNumber,
-        gpa,
-        scholarship,
-        getAcademicStatus());
-  }
-}
-
-/**
- * Объявление главного класса файла.
+ * Запуск приложения.
  */
 public class Main {
 
   private static final Scanner SCANNER = new Scanner(System.in);
 
   private static final String[] MENU_ITEMS = {
-    "Добавить пустой объект (конструктор по умолчанию)",
-    "Добавить объект с данными пользователя",
-    "Редактировать поле объекта по индексу",
-    "Вывести информацию обо всех объектах",
-    "Сортировать список по выбранному полю",
-    "Завершить работу программы",
+      "Добавить пустой объект (конструктор по умолчанию)",
+      "Добавить объект с данными пользователя",
+      "Редактировать поле объекта по индексу",
+      "Вывести информацию обо всех объектах",
+      "Сортировать список по выбранному полю",
+      "Завершить работу программы",
   };
 
   /**
-   * Запуск приложения
+   * Главный метод программы.
+   *
+   * @param args аргументы командной строки.
    */
   public static void main(String[] args) {
     List<Student> students = new ArrayList<>();
@@ -552,9 +206,6 @@ public class Main {
     printAllStudents(students);
   }
 
-  /**
-   * Выводит главное меню в консоль.
-   */
   private static void printMenu() {
     System.out.println("Выберите действие:");
     for (int i = 0; i < MENU_ITEMS.length; i++) {
@@ -563,10 +214,6 @@ public class Main {
     System.out.print("Ваш выбор: ");
   }
 
-  /**
-   * Считывает целое число из stdin в диапазоне [{@code min}, {@code max}]. Повторяет запрос, пока
-   * не будет введено корректное значение.
-   */
   private static int readIntInRange(int min, int max) {
     while (true) {
       String input = SCANNER.nextLine().trim();
@@ -583,18 +230,11 @@ public class Main {
     }
   }
 
-  /**
-   * Выводит подсказку и считывает целое число в диапазоне [{@code min}, {@code max}].
-   */
   private static int readIntWithPrompt(String prompt, int min, int max) {
     System.out.printf("%s: ", prompt);
     return readIntInRange(min, max);
   }
 
-  /**
-   * Считывает вещественное число из stdin в диапазоне [{@code min}, {@code max}]. Повторяет запрос,
-   * пока не будет введено корректное значение.
-   */
   private static double readDoubleInRange(double min, double max) {
     while (true) {
       String input = SCANNER.nextLine().trim().replace(',', '.');
@@ -613,18 +253,11 @@ public class Main {
     }
   }
 
-  /**
-   * Выводит подсказку и считывает вещественное число в диапазоне [{@code min}, {@code max}].
-   */
   private static double readDoubleWithPrompt(String prompt, double min, double max) {
     System.out.printf("%s: ", prompt);
     return readDoubleInRange(min, max);
   }
 
-  /**
-   * Считывает непустую строку из stdin длиной от 2 до 50 символов. Повторяет запрос, пока не будет
-   * введено корректное значение.
-   */
   private static String readString(String prompt) {
     while (true) {
       System.out.printf("%s: ", prompt);
@@ -637,19 +270,11 @@ public class Main {
     }
   }
 
-  /**
-   * Считывает корректный индекс объекта в списке (нумерация с 0). Повторяет запрос, пока индекс не
-   * окажется в допустимых границах.
-   */
   private static int readIndexInList(List<Student> students) {
     System.out.printf("Введите индекс объекта (0–%d): ", students.size() - 1);
     return readIntInRange(0, students.size() - 1);
   }
 
-  /**
-   * Считывает выбор пола ({@link Gender}) из stdin. Повторяет запрос, пока не будет введено 1
-   * (мужской) или 2 (женский).
-   */
   private static Gender readGender() {
     System.out.println("Пол: 1. Мужской, 2. Женский");
     System.out.print("Ваш выбор: ");
