@@ -1,8 +1,3 @@
-/*
-Главный файл проекта.
-Предоставляет меню для запуска заданий по практическим работам.
-*/
-
 import java.util.Scanner;
 
 public class Main {
@@ -11,6 +6,8 @@ public class Main {
 
   private static final String[] TASKS = {
       "Сортировка матрицы по сумме модулей элементов строк",
+      "Реализация класса согласно варианту Студент",
+      "Иерархия наследования",
   };
 
   public static void main(String[] args) {
@@ -58,6 +55,14 @@ public class Main {
       case 1:
         System.out.println("--- " + TASKS[0] + " ---");
         pr1.Main.main(null);
+        break;
+      case 2:
+        System.out.println("--- " + TASKS[1] + " ---");
+        pr2.Main.main(null);
+        break;
+      case 3:
+        System.out.println("--- " + TASKS[2] + " ---");
+        pr3.Main.main(null);
         break;
       default:
         System.out.println("Задание не найдено");
