@@ -8,6 +8,7 @@ public class Main {
       "Сортировка матрицы по сумме модулей элементов строк",
       "Реализация класса согласно варианту Студент",
       "Иерархия наследования",
+      "Программа анализа латинских символов",
   };
 
   public static void main(String[] args) {
@@ -63,6 +64,10 @@ public class Main {
       case 3:
         System.out.println("--- " + TASKS[2] + " ---");
         pr3.Main.main(null);
+        break;
+      case 4:
+        System.out.println("--- " + TASKS[3] + " ---");
+        pr4.Main.main(null);
         break;
       default:
         System.out.println("Задание не найдено");
