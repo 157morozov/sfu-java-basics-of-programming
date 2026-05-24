@@ -9,6 +9,7 @@ public class Main {
       "Реализация класса согласно варианту Студент",
       "Иерархия наследования",
       "Программа анализа латинских символов",
+      "Исключения по 2 работе"
   };
 
   public static void main(String[] args) {
@@ -68,6 +69,10 @@ public class Main {
       case 4:
         System.out.println("--- " + TASKS[3] + " ---");
         pr4.Main.main(null);
+        break;
+      case 5:
+        System.out.println("--- " + TASKS[4] + " ---");
+        pr5.Main.main(null);
         break;
       default:
         System.out.println("Задание не найдено");
