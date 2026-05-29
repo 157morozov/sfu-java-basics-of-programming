@@ -9,23 +9,25 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
-
+/**
+ * Точка входа в приложение для работы со списком студентов.
+ */
 public class Main {
 
-  /**
-   * Логгер уровня приложения. Настраивается в {@link #configureLogging()}.
-   */
+  /** Логгер уровня приложения. */
   private static final Logger APP_LOGGER = Logger.getLogger(Main.class.getName());
 
+  /** Объект для чтения данных из консоли. */
   private static final Scanner SCANNER = new Scanner(System.in);
 
+  /** Пункты главного меню. */
   private static final String[] MENU_ITEMS = {
       "Добавить пустой объект (конструктор по умолчанию)",
       "Добавить объект с данными пользователя",
       "Редактировать поле объекта по индексу",
       "Вывести информацию обо всех объектах",
       "Сортировать список по выбранному полю",
-      "Завершить работу программы",
+      "Завершить работу программы"
   };
 
   /**
@@ -71,8 +73,7 @@ public class Main {
   }
 
   /**
-   * Настраивает логирование: устанавливает уровень {@code INFO} и форматирует вывод через
-   * {@link SimpleFormatter}, чтобы журнал читался отдельно от стандартного вывода программы.
+   * Настраивает протоколирование приложения.
    */
   private static void configureLogging() {
     Logger rootLogger = Logger.getLogger("");
@@ -90,83 +91,76 @@ public class Main {
 
   /**
    * Добавляет студента со значениями по умолчанию.
-   * Паттерн 1 — простой перехват и
-   * паттерн 3 — подавление исключений:
-   * если конструктор {@link Student#Student()} выбросил {@link InvalidFieldException},
-   * перехватываем её, выводим сообщение об ошибке и дополнительно отображаем все подавленные
-   * исключения через {@link Throwable#getSuppressed()}.
+   * Простой перехват исключения показан в конструкции {@code try-catch}; блок {@code catch}
+   * оставлен пустым по требованию задания преподавателя. Реакция интерфейса выполняется после
+   * конструкции {@code try-catch} по факту успешного или неуспешного создания объекта.
    *
-   * @param students список студентов, в который добавляется новый объект.
+   * @param students список студентов.
    */
   private static void addDefaultStudent(List<Student> students) {
+    Student student = null;
+
     try {
-      students.add(new Student());
-      System.out.println(
-          "Добавлен объект со значениями по умолчанию (индекс " + (students.size() - 1) + ")");
-      APP_LOGGER.info("Добавлен студент по умолчанию, всего: " + students.size());
+      student = new Student();
     } catch (InvalidFieldException ex) {
-      System.out.println("Ошибка создания студента по умолчанию: " + ex.getMessage());
-      Throwable[] suppressed = ex.getSuppressed();
-      if (suppressed.length > 0) {
-        System.out.println("  Подавленные исключения (" + suppressed.length + "):");
-        for (Throwable s : suppressed) {
-          System.out.println("    → " + s.getMessage());
-        }
-      }
-      APP_LOGGER.log(Level.WARNING, "Не удалось создать студента по умолчанию", ex);
     }
+
+    if (student == null) {
+      System.out.println("Ошибка: студент со значениями по умолчанию не создан");
+      APP_LOGGER.warning("Не удалось создать студента по умолчанию");
+      return;
+    }
+
+    students.add(student);
+    System.out.println(
+        "Добавлен объект со значениями по умолчанию (индекс " + (students.size() - 1) + ")");
+    APP_LOGGER.info("Добавлен студент по умолчанию, всего: " + students.size());
   }
 
   /**
    * Запрашивает у пользователя данные и добавляет нового студента.
-   * Паттерн 2 — повторное генерирование / цепочка исключений:
-   * конструктор {@link Student} внутри себя оборачивает {@link StudentAgeException} в
-   * {@link InvalidFieldException}; здесь мы перехватываем её, печатаем сообщение верхнего уровня и,
-   * если есть причина, раскрываем цепочку.
+   * Повторное генерирование и связывание в цепочку реализованы в конструкторе {@link Student}:
+   * некорректный возраст связывается с {@link InvalidFieldException} через причину исключения.
+   * Блок {@code catch} здесь намеренно пустой, а пользователь получает сообщение после проверки
+   * результата создания объекта.
    *
    * @param students список студентов.
    */
   private static void addStudentFromInput(List<Student> students) {
     System.out.println("Добавление нового студента:");
 
+    Student student = null;
+    String name = readString("Имя");
+    String surname = readString("Фамилия");
+    String patronymic = readString("Отчество");
+    int age = readIntWithPrompt("Возраст (16–100)", 16, 100);
+    double gpa = readDoubleWithPrompt("Средний балл (0.0–5.0)", 0.0, 5.0);
+    int groupNumber = readIntWithPrompt("Номер группы (> 0)", 1, Integer.MAX_VALUE);
+    double scholarship = readDoubleWithPrompt("Стипендия (руб., >= 0)", 0.0, Double.MAX_VALUE);
+    StudyGroup group = readStudyGroup();
+    Gender gender = readGender();
+
     try {
-      String name = readString("Имя");
-      String surname = readString("Фамилия");
-      String patronymic = readString("Отчество");
-      int age = readIntWithPrompt("Возраст (16–100)", 16, 100);
-      double gpa = readDoubleWithPrompt("Средний балл (0.0–5.0)", 0.0, 5.0);
-      int groupNumber = readIntWithPrompt("Номер группы (> 0)", 1, Integer.MAX_VALUE);
-      double scholarship = readDoubleWithPrompt("Стипендия (руб., >= 0)", 0.0, Double.MAX_VALUE);
-
-      StudyGroup group = readStudyGroup();
-      Gender gender = readGender();
-
-      Student student = new Student(
+      student = new Student(
           name, surname, patronymic, age, gpa, groupNumber, scholarship, group, gender);
-      students.add(student);
-      System.out.println("Студент добавлен (индекс " + (students.size() - 1) + ")");
-      APP_LOGGER.info("Добавлен новый студент: " + student.getFullName());
-
     } catch (InvalidFieldException ex) {
-      System.out.println("Ошибка: " + ex.getMessage()
-          + " (поле: «" + ex.getFieldName() + "»)");
-      Throwable cause = ex.getCause();
-      if (cause != null) {
-        System.out.println("  Причина: " + cause.getMessage());
-        if (cause instanceof StudentAgeException) {
-          StudentAgeException ageEx = (StudentAgeException) cause;
-          System.out.println("  Недопустимый возраст: " + ageEx.getInvalidAge());
-        }
-      }
-      APP_LOGGER.log(Level.WARNING, "Ошибка при добавлении студента", ex);
     }
+
+    if (student == null) {
+      System.out.println("Ошибка: студент не добавлен. Проверьте введённые данные.");
+      APP_LOGGER.warning("Ошибка при добавлении студента");
+      return;
+    }
+
+    students.add(student);
+    System.out.println("Студент добавлен (индекс " + (students.size() - 1) + ")");
+    APP_LOGGER.info("Добавлен новый студент: " + student.getFullName());
   }
 
   /**
-   * Редактирует указанное поле существующего студента.
-   * Паттерн 1 — простой перехват: каждый сеттер может выбросить
-   * {@link InvalidFieldException} или {@link StudentAgeException}; оба типа перехватываются и
-   * отображаются пользователю.
+   * Редактирует выбранное поле существующего студента.
+   * Перехват исключений выполняется пустыми блоками {@code catch}; сообщение пользователю
+   * выводится после конструкции {@code try-catch}.
    *
    * @param students список студентов.
    */
@@ -189,6 +183,7 @@ public class Main {
     }
 
     int fieldChoice = readIntInRange(1, fields.length);
+    boolean updated = false;
 
     try {
       switch (fieldChoice) {
@@ -224,22 +219,22 @@ public class Main {
         default:
           System.out.println("Ошибка: неизвестное поле");
       }
+      updated = true;
+    } catch (InvalidFieldException ex) {
+    } catch (StudentAgeException ex) {
+    }
+
+    if (updated) {
       System.out.println("Данные обновлены");
       APP_LOGGER.info("Обновлён студент [" + index + "]: поле " + fields[fieldChoice - 1]);
-
-    } catch (InvalidFieldException ex) {
-      System.out.println("Ошибка обновления поля «" + ex.getFieldName() + "»: "
-          + ex.getMessage());
-      APP_LOGGER.log(Level.WARNING, "Ошибка редактирования студента", ex);
-    } catch (StudentAgeException ex) {
-      System.out.println("Ошибка: недопустимый возраст " + ex.getInvalidAge()
-          + ". " + ex.getMessage());
-      APP_LOGGER.log(Level.WARNING, "Ошибка возраста при редактировании", ex);
+    } else {
+      System.out.println("Ошибка: данные не обновлены. Значение не прошло проверку.");
+      APP_LOGGER.warning("Ошибка редактирования студента");
     }
   }
 
   /**
-   * Выводит информацию обо всех студентах в списке.
+   * Выводит информацию обо всех студентах.
    *
    * @param students список студентов.
    */
@@ -255,7 +250,7 @@ public class Main {
   }
 
   /**
-   * Сортирует список студентов по выбранному пользователем полю.
+   * Сортирует список студентов по выбранному полю.
    *
    * @param students список студентов.
    */
@@ -301,13 +296,12 @@ public class Main {
     }
 
     students.sort(comparator);
-    System.out.println(
-        "Список отсортирован по полю \"" + sortFields[sortChoice - 1] + "\"");
+    System.out.println("Список отсортирован по полю \"" + sortFields[sortChoice - 1] + "\"");
     printAllStudents(students);
   }
 
   /**
-   * Выводит главное меню программы.
+   * Выводит главное меню.
    */
   private static void printMenu() {
     System.out.println("Выберите действие:");
@@ -318,11 +312,11 @@ public class Main {
   }
 
   /**
-   * Читает из стандартного ввода целое число в диапазоне [{@code min}; {@code max}].
+   * Читает целое число из заданного диапазона.
    *
-   * @param min минимально допустимое значение.
-   * @param max максимально допустимое значение.
-   * @return введённое пользователем число.
+   * @param min минимальное значение.
+   * @param max максимальное значение.
+   * @return введённое целое число.
    */
   private static int readIntInRange(int min, int max) {
     while (true) {
@@ -341,12 +335,12 @@ public class Main {
   }
 
   /**
-   * Выводит подсказку и читает целое число в диапазоне [{@code min}; {@code max}].
+   * Выводит подсказку и читает целое число.
    *
-   * @param prompt подсказка пользователю.
-   * @param min минимально допустимое значение.
-   * @param max максимально допустимое значение.
-   * @return введённое пользователем число.
+   * @param prompt подсказка.
+   * @param min минимальное значение.
+   * @param max максимальное значение.
+   * @return введённое целое число.
    */
   private static int readIntWithPrompt(String prompt, int min, int max) {
     System.out.printf("%s: ", prompt);
@@ -354,22 +348,20 @@ public class Main {
   }
 
   /**
-   * Читает из стандартного ввода вещественное число в диапазоне [{@code min}; {@code max}].
+   * Читает вещественное число из заданного диапазона.
    *
-   * @param min минимально допустимое значение.
-   * @param max максимально допустимое значение.
-   * @return введённое пользователем число.
+   * @param min минимальное значение.
+   * @param max максимальное значение.
+   * @return введённое вещественное число.
    */
   private static double readDoubleInRange(double min, double max) {
     while (true) {
       String input = SCANNER.nextLine().trim().replace(',', '.');
-      double value;
-      try {
-        value = Double.parseDouble(input);
-      } catch (NumberFormatException e) {
+      if (!input.matches("-?((\\d+\\.\\d+)|(\\d+)|(\\.\\d+))")) {
         System.out.print("Ошибка: введите число (напр. 3.75): ");
         continue;
       }
+      double value = Double.parseDouble(input);
       if (value < min || value > max) {
         System.out.printf("Ошибка: число должно быть от %.2f до %.2f: ", min, max);
         continue;
@@ -379,12 +371,12 @@ public class Main {
   }
 
   /**
-   * Выводит подсказку и читает вещественное число в диапазоне [{@code min}; {@code max}].
+   * Выводит подсказку и читает вещественное число.
    *
-   * @param prompt подсказка пользователю.
-   * @param min минимально допустимое значение.
-   * @param max максимально допустимое значение.
-   * @return введённое пользователем число.
+   * @param prompt подсказка.
+   * @param min минимальное значение.
+   * @param max максимальное значение.
+   * @return введённое вещественное число.
    */
   private static double readDoubleWithPrompt(String prompt, double min, double max) {
     System.out.printf("%s: ", prompt);
@@ -392,10 +384,10 @@ public class Main {
   }
 
   /**
-   * Читает строку от пользователя, проверяя длину (2–50 символов).
+   * Читает строку и проверяет её длину.
    *
-   * @param prompt подсказка пользователю.
-   * @return введённая строка.
+   * @param prompt подсказка.
+   * @return корректная строка.
    */
   private static String readString(String prompt) {
     while (true) {
@@ -410,10 +402,10 @@ public class Main {
   }
 
   /**
-   * Читает индекс существующего студента из диапазона [0; size-1].
+   * Читает индекс существующего студента.
    *
    * @param students список студентов.
-   * @return допустимый индекс.
+   * @return индекс студента.
    */
   private static int readIndexInList(List<Student> students) {
     System.out.printf("Введите индекс объекта (0–%d): ", students.size() - 1);
@@ -421,9 +413,9 @@ public class Main {
   }
 
   /**
-   * Читает пол студента интерактивно.
+   * Читает пол студента.
    *
-   * @return выбранное значение {@link Gender}.
+   * @return выбранный пол.
    */
   private static Gender readGender() {
     System.out.println("Пол: 1. Мужской  2. Женский");
@@ -433,10 +425,10 @@ public class Main {
   }
 
   /**
-   * Запрашивает у пользователя данные учебной группы и создаёт объект {@link StudyGroup}.
-   * При ошибке создания группы выводит сообщение и повторяет запрос.
+   * Читает учебную группу. Если конструктор выбрасывает исключение, блок {@code catch}
+   * остаётся пустым, а сообщение пользователю выводится после проверки результата.
    *
-   * @return корректно заполненный объект {@link StudyGroup}.
+   * @return корректная учебная группа.
    */
   private static StudyGroup readStudyGroup() {
     while (true) {
@@ -444,12 +436,18 @@ public class Main {
       int course = readIntWithPrompt(
           "Курс (" + StudyGroup.MIN_COURSE + "–" + StudyGroup.MAX_COURSE + ")",
           StudyGroup.MIN_COURSE, StudyGroup.MAX_COURSE);
+      StudyGroup group = null;
+
       try {
-        return new StudyGroup(groupName, course);
+        group = new StudyGroup(groupName, course);
       } catch (InvalidFieldException ex) {
-        System.out.println("Ошибка создания группы: " + ex.getMessage() + ". Повторите ввод.");
-        APP_LOGGER.log(Level.WARNING, "Невалидные данные группы", ex);
       }
+
+      if (group != null) {
+        return group;
+      }
+      System.out.println("Ошибка создания группы. Повторите ввод.");
+      APP_LOGGER.warning("Невалидные данные группы");
     }
   }
 }

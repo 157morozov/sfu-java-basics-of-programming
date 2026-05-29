@@ -1,37 +1,32 @@
 package pr5;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
+/**
+ * Студент с набором учебных характеристик.
+ */
 class Student {
 
-  /**
-   * Логгер класса. Используется для записи предупреждений при невалидных данных и информационных
-   * сообщений об успешных операциях.
-   */
+  /** Логгер класса Student. */
   private static final Logger LOGGER = Logger.getLogger(Student.class.getName());
 
   private String name;
   private String surname;
   private String patronymic;
-
   private int age;
   private double gpa;
   private int groupNumber;
   private double scholarship;
-
   private StudyGroup group;
   private Gender gender;
 
   /**
    * Создаёт студента со значениями по умолчанию.
-   * Демонстрирует подавление исключения: если создание {@link StudyGroup}
-   * по умолчанию по каким-либо причинам завершится ошибкой, исключение подавляется через
-   * {@link Throwable#addSuppressed} и добавляется к общему {@link InvalidFieldException}. Это
-   * позволяет не потерять информацию об ошибке, продолжая обработку основного пути.
+   * Здесь демонстрируется подавление исключения в понимании задания: блок {@code catch}
+   * полностью пустой. Исключение от намеренно некорректной пробной группы игнорируется,
+   * после чего объект создаётся с корректной группой по умолчанию.
    *
-   * @throws InvalidFieldException если инициализация значений по умолчанию оказалась невозможной.
+   * @throws InvalidFieldException если корректная группа по умолчанию не была создана.
    */
   public Student() throws InvalidFieldException {
     this.name = "Имя";
@@ -43,27 +38,20 @@ class Student {
     this.scholarship = 0.0;
     this.gender = Gender.MALE;
 
-    InvalidFieldException primary = null;
     try {
-      this.group = new StudyGroup("Группа по умолчанию", 1);
-      LOGGER.info("Студент создан со значениями по умолчанию");
-    } catch (InvalidFieldException groupEx) {
-      primary = new InvalidFieldException("group",
-          "Не удалось создать группу по умолчанию");
-      primary.addSuppressed(groupEx);
-      LOGGER.log(Level.WARNING, "Ошибка при создании группы по умолчанию", groupEx);
+      new StudyGroup("", 0);
+    } catch (InvalidFieldException ex) {
     }
-    if (primary != null) {
-      throw primary;
-    }
+
+    this.group = new StudyGroup("Группа по умолчанию", 1);
+    LOGGER.info("Студент создан со значениями по умолчанию");
   }
 
   /**
    * Создаёт студента с явно указанными значениями всех полей.
-   * Демонстрирует повторное генерирование и цепочку исключений (rethrow/chaining):
-   * если конструктор {@link StudyGroup} выбросил {@link InvalidFieldException}, она перехватывается
-   * и пробрасывается повторно как новое {@link InvalidFieldException} с более подробным контекстом,
-   * сохраняя исходную причину (cause).
+   * Повторное генерирование и связывание в цепочку демонстрируется для возраста: сначала
+   * моделируется специальное исключение {@link StudentAgeException}, затем оно становится
+   * причиной общего {@link InvalidFieldException}.
    *
    * @param name имя.
    * @param surname фамилия.
@@ -72,10 +60,9 @@ class Student {
    * @param gpa средний балл.
    * @param groupNumber номер группы.
    * @param scholarship стипендия.
-   * @param group готовый объект учебной группы.
+   * @param group учебная группа.
    * @param gender пол.
-   * @throws InvalidFieldException если любое из переданных значений не прошло валидацию (в том
-   *                               числе если возраст был обёрнут в цепочку исключений).
+   * @throws InvalidFieldException если одно из полей не прошло проверку.
    */
   public Student(
       String name,
@@ -92,14 +79,22 @@ class Student {
     setSurname(surname);
     setPatronymic(patronymic);
 
-    try {
-      setAge(age);
-    } catch (StudentAgeException ex) {
-      LOGGER.log(Level.WARNING, "Недопустимый возраст при создании студента: " + age, ex);
-      throw new InvalidFieldException("age",
-          "Недопустимый возраст при создании студента: " + age, ex);
+    StudentAgeException ageProblem = null;
+    if (age < 16 || age > 100) {
+      ageProblem = new StudentAgeException(age,
+          "Возраст должен быть в диапазоне от 16 до 100, получено: " + age);
+      try {
+        throw ageProblem;
+      } catch (StudentAgeException ex) {
+      }
+    }
+    if (ageProblem != null) {
+      LOGGER.warning("Недопустимый возраст при создании студента: " + age);
+      throw new InvalidFieldException(
+          "age", "Недопустимый возраст при создании студента", ageProblem);
     }
 
+    this.age = age;
     setGpa(gpa);
     setGroupNumber(groupNumber);
     setScholarship(scholarship);
@@ -112,97 +107,61 @@ class Student {
   /**
    * Возвращает полное имя студента.
    *
-   * @return полное имя студента.
+   * @return полное имя.
    */
   public String getFullName() {
     return getSurname() + " " + getName() + " " + getPatronymic();
   }
 
-  /**
-   * Возвращает имя.
-   *
-   * @return имя.
-   */
+  /** @return имя студента. */
   public String getName() {
     return name != null ? name : "";
   }
 
-  /**
-   * Возвращает фамилию.
-   *
-   * @return фамилию.
-   */
+  /** @return фамилия студента. */
   public String getSurname() {
     return surname != null ? surname : "";
   }
 
-  /**
-   * Возвращает отчество.
-   *
-   * @return отчество.
-   */
+  /** @return отчество студента. */
   public String getPatronymic() {
     return patronymic != null ? patronymic : "";
   }
 
-  /**
-   * Возвращает возраст студента.
-   *
-   * @return возраст студента.
-   */
+  /** @return возраст студента. */
   public int getAge() {
     return age;
   }
 
-  /**
-   * Возвращает средний балл.
-   *
-   * @return средний балл.
-   */
+  /** @return средний балл. */
   public double getGpa() {
     return gpa;
   }
 
-  /**
-   * Возвращает номер учебной группы.
-   *
-   * @return номер группы.
-   */
+  /** @return номер группы. */
   public int getGroupNumber() {
     return groupNumber;
   }
 
-  /**
-   * Возвращает размер ежемесячной стипендии.
-   *
-   * @return размер стипендии.
-   */
+  /** @return размер стипендии. */
   public double getScholarship() {
     return scholarship;
   }
 
-  /**
-   * Возвращает строковое представление учебной группы.
-   *
-   * @return строковое представление группы.
-   */
+  /** @return строковое представление учебной группы. */
   public String getStudyGroup() {
     return group != null ? group.toString() : "";
   }
 
-  /**
-   * Возвращает обозначение пола.
-   *
-   * @return обозначение пола.
-   */
+  /** @return читаемое обозначение пола. */
   public String getGender() {
     return gender.getLabel();
   }
 
   /**
-   * Возвращает академический статус студента на основе среднего балла.
+   * Возвращает академический статус студента.
    *
-   * @return статус студента.
+   * @return академический статус.
    */
   public String getAcademicStatus() {
     if (gpa >= 4.5) {
@@ -219,8 +178,8 @@ class Student {
   /**
    * Устанавливает имя студента.
    *
-   * @param name имя (от 2 до 50 непустых символов).
-   * @throws InvalidFieldException если строка не прошла валидацию.
+   * @param name имя.
+   * @throws InvalidFieldException если имя некорректно.
    */
   public void setName(String name) throws InvalidFieldException {
     validateString("имя", name);
@@ -230,8 +189,8 @@ class Student {
   /**
    * Устанавливает фамилию студента.
    *
-   * @param surname фамилия (от 2 до 50 непустых символов).
-   * @throws InvalidFieldException если строка не прошла валидацию.
+   * @param surname фамилия.
+   * @throws InvalidFieldException если фамилия некорректна.
    */
   public void setSurname(String surname) throws InvalidFieldException {
     validateString("фамилия", surname);
@@ -241,8 +200,8 @@ class Student {
   /**
    * Устанавливает отчество студента.
    *
-   * @param patronymic отчество (от 2 до 50 непустых символов).
-   * @throws InvalidFieldException если строка не прошла валидацию.
+   * @param patronymic отчество.
+   * @throws InvalidFieldException если отчество некорректно.
    */
   public void setPatronymic(String patronymic) throws InvalidFieldException {
     validateString("отчество", patronymic);
@@ -251,11 +210,9 @@ class Student {
 
   /**
    * Устанавливает возраст студента.
-   * Выбрасывает {@link StudentAgeException} — отдельный тип исключения,
-   * предназначенный именно для ошибок возраста.
    *
-   * @param age возраст (от 16 до 100 включительно).
-   * @throws StudentAgeException если возраст выходит за допустимые границы.
+   * @param age возраст.
+   * @throws StudentAgeException если возраст вне диапазона 16-100.
    */
   public void setAge(int age) throws StudentAgeException {
     if (age < 16 || age > 100) {
@@ -266,10 +223,10 @@ class Student {
   }
 
   /**
-   * Устанавливает средний балл студента.
+   * Устанавливает средний балл.
    *
-   * @param gpa средний балл (от 0.0 до 5.0 включительно).
-   * @throws InvalidFieldException если значение выходит за допустимый диапазон.
+   * @param gpa средний балл.
+   * @throws InvalidFieldException если балл вне диапазона 0.0-5.0.
    */
   public void setGpa(double gpa) throws InvalidFieldException {
     if (gpa < 0.0 || gpa > 5.0) {
@@ -280,10 +237,10 @@ class Student {
   }
 
   /**
-   * Устанавливает номер учебной группы.
+   * Устанавливает номер группы.
    *
-   * @param groupNumber номер группы (положительное целое число).
-   * @throws InvalidFieldException если значение не является положительным.
+   * @param groupNumber номер группы.
+   * @throws InvalidFieldException если номер группы неположительный.
    */
   public void setGroupNumber(int groupNumber) throws InvalidFieldException {
     if (groupNumber <= 0) {
@@ -294,10 +251,10 @@ class Student {
   }
 
   /**
-   * Устанавливает размер стипендии.
+   * Устанавливает стипендию.
    *
-   * @param scholarship стипендия (неотрицательное число).
-   * @throws InvalidFieldException если значение отрицательное.
+   * @param scholarship стипендия.
+   * @throws InvalidFieldException если стипендия отрицательна.
    */
   public void setScholarship(double scholarship) throws InvalidFieldException {
     if (scholarship < 0.0) {
@@ -308,10 +265,10 @@ class Student {
   }
 
   /**
-   * Устанавливает учебную группу студента.
+   * Устанавливает учебную группу.
    *
    * @param group учебная группа.
-   * @throws InvalidFieldException если передан {@code null}.
+   * @throws InvalidFieldException если группа равна null.
    */
   public void setGroup(StudyGroup group) throws InvalidFieldException {
     if (group == null) {
@@ -324,7 +281,7 @@ class Student {
    * Устанавливает пол студента.
    *
    * @param gender пол.
-   * @throws InvalidFieldException если передан {@code null}.
+   * @throws InvalidFieldException если пол равен null.
    */
   public void setGender(Gender gender) throws InvalidFieldException {
     if (gender == null) {
@@ -334,11 +291,11 @@ class Student {
   }
 
   /**
-   * Проверяет, что строка непустая и имеет длину от 2 до 50 символов.
+   * Проверяет строковое поле.
    *
-   * @param fieldName название поля (для сообщения об ошибке).
-   * @param value проверяемое значение.
-   * @throws InvalidFieldException если строка не прошла валидацию.
+   * @param fieldName название поля.
+   * @param value значение поля.
+   * @throws InvalidFieldException если строка пустая или имеет недопустимую длину.
    */
   private void validateString(String fieldName, String value) throws InvalidFieldException {
     if (value == null || value.isBlank()) {
@@ -347,8 +304,8 @@ class Student {
     }
     if (value.length() < 2 || value.length() > 50) {
       throw new InvalidFieldException(fieldName,
-          "Поле «" + fieldName + "» должно содержать от 2 до 50 символов, "
-              + "получено: " + value.length());
+          "Поле «" + fieldName + "» должно содержать от 2 до 50 символов, получено: "
+              + value.length());
     }
   }
 
@@ -357,13 +314,7 @@ class Student {
     return String.format(
         "%s (Возраст: %d, Пол: %s, Группа: %s, Номер гр.: %d, "
             + "Средний балл: %.2f, Стипендия: %.2f руб., Статус: %s)",
-        getFullName(),
-        age,
-        getGender(),
-        getStudyGroup(),
-        groupNumber,
-        gpa,
-        scholarship,
-        getAcademicStatus());
+        getFullName(), age, getGender(), getStudyGroup(), groupNumber, gpa,
+        scholarship, getAcademicStatus());
   }
 }
