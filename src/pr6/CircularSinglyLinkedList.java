@@ -50,14 +50,6 @@ class CircularSinglyLinkedList<T> {
     return size == 0;
   }
 
-  /**
-   * Возвращает количество элементов списка.
-   *
-   * @return количество элементов списка.
-   */
-  public int size() {
-    return size;
-  }
 
   /**
    * Устанавливает указатель в начало списка.

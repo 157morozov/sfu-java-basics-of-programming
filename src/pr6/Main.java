@@ -225,7 +225,7 @@ public class Main {
     if (list.isEmpty()) {
       System.out.println("Список пуст");
     } else {
-      System.out.println("Список не пуст. Количество элементов: " + list.size());
+      System.out.println("Список не пуст");
     }
   }
 
